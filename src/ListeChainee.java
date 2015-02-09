@@ -108,6 +108,7 @@ public class ListeChainee {
 		}
 
 		else {
+			
 			// si la liste n'est pas vite
 			if (getNbElement() == 1) {
 				// fin liste devient nouveau noeud et suivant du début = fin
@@ -119,13 +120,14 @@ public class ListeChainee {
 				if (positionCourante == finListe) {
 					nInserer = new Noeud(element, null, positionCourante);
 					positionCourante.suivant = nInserer;
-					finListe = nInserer;
-
-				} else {
+					
+				}
+				else {
 					// inserer le nouveau noeud apres la PC
 					nInserer = new Noeud(element, positionCourante.suivant,
 							positionCourante);
 					positionCourante.suivant = nInserer;
+					
 				}
 
 			}
@@ -182,14 +184,19 @@ public class ListeChainee {
 			positionCourante = finListe;
 		}
 	}
-
+	public void positionCouranteDebut(){
+		positionCourante = debutListe;
+	}
+	public void positionCouranteFin(){
+		positionCourante = finListe;
+	}
 	// retourne la valeur de la position courante
 	public Object affichePositionCourante() {
 		return positionCourante.element;
 	}
 	// retourne si la liste est vide
 	public boolean estVide() {
-		return (nbElement <= 0);
+		return nbElement <= 0;
 	}
 
 	public void setElement(Object element){

@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
- * Base d'une communication via un fil d'ex√©cution parall√®le.
+ * Base d'une communication via un fil d'ex√©cution parall√®le
  */
 
 
@@ -116,6 +116,7 @@ import javax.swing.SwingWorker;
 	 * MÈthode qui crÈer la communication avec le serveur
 	 */
 	protected void creerCommunication(){		
+		
 		// Cree un fil d'execusion parallele au fil courant
 		threadComm = new SwingWorker(){
 			@Override
@@ -124,13 +125,14 @@ import javax.swing.SwingWorker;
 
 				// On se connnecte au serveur
 				connecteAuServeur();
-
+				int compteur = 0;
 				while(true){
+					compteur ++;
 					Thread.sleep(DELAI);
-
+					
 					// C'EST DANS CETTE BOUCLE QU'ON COMMUNIQUE AVEC LE SERVEUR
 					formeInfo = getLigneServeur();
-
+					
 					//La methode suivante alerte l'observateur
 					if(listener!=null)
 						firePropertyChange("ligne", null, (Object) formeInfo);
@@ -193,7 +195,7 @@ import javax.swing.SwingWorker;
 			wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
 			//On envoit la commande GET au serveur
 			wr.write("GET\n");
-			//On nÈtoie l'Ècriveur
+			//On nettoie l'Ècriveur
 			wr.flush();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
