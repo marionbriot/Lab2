@@ -5,7 +5,7 @@ Cours:   LOG121
 Session: H2015
 Groupe:  2
 Projet: Laboratoire #1
-Étudiant(e)s: Manon Briot
+Étudiant(e)s: Gaétan Briot
               
 *******************************************************
 Historique des modifications
