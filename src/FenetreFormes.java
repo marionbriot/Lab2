@@ -25,7 +25,7 @@ public class FenetreFormes extends JComponent{
 	private static final long serialVersionUID = -2262235643903749505L;
 	public static final int WIDTH = 500;
 	public static final int HEIGHT = 500;
-	public static final Dimension dimension = new Dimension(WIDTH,HEIGHT);
+	public static final Dimension DIMENSION = new Dimension(WIDTH,HEIGHT);
 	private Tableau tableau = new Tableau();
 	
 	/**
@@ -56,6 +56,6 @@ public class FenetreFormes extends JComponent{
 	 */
 	@Override 
 	public Dimension getPreferredSize(){
-		return dimension;
+		return DIMENSION;
 	}
 }
