@@ -44,5 +44,14 @@ class Ellipse extends Forme{
 		}
 		g.fillOval(centreX, centreY, rayonV, rayonH);
 	}
+
+	@Override
+	double getAire() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+
+	
 	
 }

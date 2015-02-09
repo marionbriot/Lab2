@@ -14,12 +14,14 @@ Historique des modifications
 *******************************************************/
 
 public abstract class Forme{
-	
+	protected double aire;
 	protected String nom;
 	protected int nseq;
 
 	abstract void dessiner(Graphics g);
 
+	abstract double getAire();
+	
 	public int getNseq(){
 		return nseq;
 	}

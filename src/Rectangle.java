@@ -47,4 +47,10 @@ class Rectangle extends Forme{
 		}
 		g.fillRect(x1, y1, largeur, longeur);
 	}
+	
+	@Override
+	double getAire() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
