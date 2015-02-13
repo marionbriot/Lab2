@@ -19,8 +19,8 @@ class Ellipse extends Forme{
 	private int centreY;
 	private int rayonH;
 	private int rayonV;
-	private Color couleurCercle= Color.pink;
-	private Color couleurOvale= Color.cyan;
+	private Color couleurCercle= new Color(255, 120, 120, 171);
+	private Color couleurOvale= new Color(0, 175, 255, 171);
 
 	Ellipse(int nseq, int centreX, int centreY, int rayonH, int rayonV){
 		this.nseq = nseq;

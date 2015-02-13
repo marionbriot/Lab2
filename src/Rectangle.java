@@ -21,10 +21,13 @@ class Rectangle extends Forme{
 	private int x2;
 	private int y1;
 	private int y2;
-	private Color couleurCarre= Color.blue;
-	private Color couleurRect= Color.red;
+
 	int largeur;
 	int longeur;
+
+	private Color couleurCarre= new Color(86,255,86,255);
+	private Color couleurRect= new Color(255,0,0,171);
+
 
 	Rectangle( int nseq, int x1, int x2, int y1, int y2){
 		nom = "Rectangle";

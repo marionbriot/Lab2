@@ -26,7 +26,7 @@ public class FenetreFormes extends JComponent{
 	public static final int WIDTH = 500;
 	public static final int HEIGHT = 500;
 	public static final Dimension DIMENSION = new Dimension(WIDTH,HEIGHT);
-	private Tableau tableau = new Tableau();
+	private ListeChainee listeChainee = new ListeChainee();
 	
 	/**
 	 * Constructeur
@@ -35,17 +35,19 @@ public class FenetreFormes extends JComponent{
 	}
 	
 	public void ajouter(Forme f){
-		this.tableau.ajouter(f);
+		this.listeChainee.insererApres(f);
 	}
 	/**
 	 * Affiche le tableau de formes 
 	 **/
 	@Override 
 	public void paintComponent(Graphics g){
-		this.tableau.print();
-		for(int i = 0; i < tableau.getLength(); i++){
-			if(tableau.get(i) != null){
-				tableau.get(i).dessiner(g);
+		//this.listeChainee.print();
+		for(int i = 0; i < listeChainee.getNbElement(); i++){
+			if(listeChainee.affichePositionCourante() != null){
+				Forme forme = (Forme) listeChainee.affichePositionCourante();
+				forme.dessiner(g);
+				listeChainee.positionCouranteSuivant();
 			}
 		}
 	}

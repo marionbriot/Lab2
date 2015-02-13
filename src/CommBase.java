@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
- * Base d'une communication via un fil d'ex√©cution parall√®le.
+ * Base d'une communication via un fil d'ex√©cution parall√®le
  */
 
 
@@ -35,7 +35,7 @@ import javax.swing.SwingWorker;
 	public String formeInfo;
 	private final String defaultServeurInfo = "localhost:10000";
 	private Socket socket;//Ce qui contient la connexion
-	private final int DELAI = 1000;
+	private final int DELAI = 1;
 	private SwingWorker threadComm =null;
 	private PropertyChangeListener listener = null;
 	private boolean isActif = false;
@@ -116,6 +116,7 @@ import javax.swing.SwingWorker;
 	 * MÈthode qui crÈer la communication avec le serveur
 	 */
 	protected void creerCommunication(){		
+		
 		// Cree un fil d'execusion parallele au fil courant
 		threadComm = new SwingWorker(){
 			@Override
@@ -124,18 +125,24 @@ import javax.swing.SwingWorker;
 
 				// On se connnecte au serveur
 				connecteAuServeur();
-
-				while(true){
+				int compteur = 0;
+				while(compteur < 10){
+					
 					Thread.sleep(DELAI);
-
+					
 					// C'EST DANS CETTE BOUCLE QU'ON COMMUNIQUE AVEC LE SERVEUR
 					formeInfo = getLigneServeur();
-
+					if(!formeInfo.equals("commande> ")){
+						compteur ++;
+					}
 					//La methode suivante alerte l'observateur
 					if(listener!=null)
 						firePropertyChange("ligne", null, (Object) formeInfo);
 				}
-				//return null;
+				if(compteur >= 10){
+					stop();
+				}
+				return null;
 			}
 		};
 		if(listener!=null)
@@ -193,7 +200,7 @@ import javax.swing.SwingWorker;
 			wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
 			//On envoit la commande GET au serveur
 			wr.write("GET\n");
-			//On nÈtoie l'Ècriveur
+			//On nettoie l'Ècriveur
 			wr.flush();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
