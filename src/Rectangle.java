@@ -23,6 +23,8 @@ class Rectangle extends Forme{
 	private int y2;
 	private Color couleurCarre= Color.blue;
 	private Color couleurRect= Color.red;
+	int largeur;
+	int longeur;
 
 	Rectangle( int nseq, int x1, int x2, int y1, int y2){
 		nom = "Rectangle";
@@ -38,8 +40,8 @@ class Rectangle extends Forme{
 	 */
 	@Override
 	void dessiner(final Graphics g) {
-		int largeur = x2 - x1;
-		int longeur = y2 - y1;
+		largeur = x2 - x1;
+		longeur = y2 - y1;
 		if(longeur == largeur){
 			g.setColor(couleurCarre);
 		} else {
@@ -50,7 +52,12 @@ class Rectangle extends Forme{
 	
 	@Override
 	double getAire() {
-		// TODO Auto-generated method stub
+		this.aire = longeur * largeur;
+		return aire;
+	}
+	@Override
+	double getDistance() {
+		this.aire = Math.sqrt((Math.pow(x2 - x1, 2)) + (Math.pow(y2 - y1, 2)));
 		return 0;
 	}
 }

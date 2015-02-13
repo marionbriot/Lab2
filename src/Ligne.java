@@ -44,7 +44,15 @@ class Ligne extends Forme{
 
 	@Override
 	double getAire() {
-		// TODO Auto-generated method stub
+		//distance entre deux points 
+		this.aire = Math.sqrt((Math.pow(x2 - x1, 2)) + (Math.pow(y2 - y1, 2)));
+		return aire;
+	}
+
+
+	@Override
+	double getDistance() {
+		this.distance = Math.sqrt((Math.pow(x2 - x1, 2)) + (Math.pow(y2 - y1, 2)));
 		return 0;
 	}
 
