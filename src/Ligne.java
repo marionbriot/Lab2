@@ -19,7 +19,7 @@ class Ligne extends Forme{
 	private int x2;
 	private int y1;
 	private int y2;
-	private Color couleurLigne= Color.green;
+	private Color couleurLigne= new Color(0,0,0,50);
 	
 	Ligne(int nseq, int x1, int x2, int y1, int y2){
 		this.nseq = nseq;

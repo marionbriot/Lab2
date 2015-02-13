@@ -35,7 +35,7 @@ import javax.swing.SwingWorker;
 	public String formeInfo;
 	private final String defaultServeurInfo = "localhost:10000";
 	private Socket socket;//Ce qui contient la connexion
-	private final int DELAI = 1000;
+	private final int DELAI = 1;
 	private SwingWorker threadComm =null;
 	private PropertyChangeListener listener = null;
 	private boolean isActif = false;
@@ -126,18 +126,23 @@ import javax.swing.SwingWorker;
 				// On se connnecte au serveur
 				connecteAuServeur();
 				int compteur = 0;
-				while(true){
-					compteur ++;
+				while(compteur < 10){
+					
 					Thread.sleep(DELAI);
 					
 					// C'EST DANS CETTE BOUCLE QU'ON COMMUNIQUE AVEC LE SERVEUR
 					formeInfo = getLigneServeur();
-					
+					if(!formeInfo.equals("commande> ")){
+						compteur ++;
+					}
 					//La methode suivante alerte l'observateur
 					if(listener!=null)
 						firePropertyChange("ligne", null, (Object) formeInfo);
 				}
-				//return null;
+				if(compteur >= 10){
+					stop();
+				}
+				return null;
 			}
 		};
 		if(listener!=null)
