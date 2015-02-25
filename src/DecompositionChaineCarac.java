@@ -4,15 +4,15 @@ import java.util.regex.Pattern;
 Cours:   LOG121
 Session: H2015
 Groupe:  2
-Projet: Laboratoire #1
+Projet: Laboratoire #2
 Étudiant(e)s: Marion Briot
-              
-*******************************************************
+
+ *******************************************************
 Historique des modifications
-*******************************************************
+ *******************************************************
 2013-0X-XX Version initiale (et1)
 2013-0X-XX Ajout de la fonction (et2)
-*******************************************************/
+ *******************************************************/
 
 public class DecompositionChaineCarac{
 	

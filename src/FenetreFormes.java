@@ -26,30 +26,36 @@ public class FenetreFormes extends JComponent{
 	public static final int WIDTH = 500;
 	public static final int HEIGHT = 500;
 	public static final Dimension DIMENSION = new Dimension(WIDTH,HEIGHT);
-	private ListeChainee listeChainee = new ListeChainee();
+	private ListeChainee listeChainee;
 	
 	/**
 	 * Constructeur
 	 */
-	public FenetreFormes(){
+	public FenetreFormes(ListeChainee liste){
+		this.listeChainee = liste;
 	}
 	
+	/**
+	 * Ajoute une forme à la liste chaînée
+	 */
 	public void ajouter(Forme f){
 		this.listeChainee.insererApres(f);
 	}
+	
+	
 	/**
 	 * Affiche le tableau de formes 
 	 **/
 	@Override 
 	public void paintComponent(Graphics g){
-		//this.listeChainee.print();
-		for(int i = 0; i < listeChainee.getNbElement(); i++){
-			if(listeChainee.affichePositionCourante() != null){
-				Forme forme = (Forme) listeChainee.affichePositionCourante();
+		for(int i = 0; i < listeChainee.getNbElements(); i++){
+			if(listeChainee.getPositionCourante() != null){
+				Forme forme = (Forme) listeChainee.getPositionCourante();
 				forme.dessiner(g);
 				listeChainee.positionCouranteSuivant();
 			}
 		}
+		listeChainee.setPositionCouranteDebut();
 	}
 	
 	/*

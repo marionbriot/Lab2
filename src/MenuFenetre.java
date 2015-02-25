@@ -9,21 +9,10 @@ Historique des modifications
  *@author Patrice Boucher
 2013-05-03 Version initiale
  *******************************************************/  
-
-/******************************************************
-Cours:  LOG121
-Projet: Squelette du laboratoire #1
-Nom du fichier: MenuFenetre.java
-Date crÃ©Ã©: 2013-05-03
- *******************************************************
-Historique des modifications
- *******************************************************
- *@author Patrice Boucher
-2013-05-03 Version initiale
- *******************************************************/  
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -40,12 +29,15 @@ public class MenuFenetre extends JMenuBar{
 	private static final char MENU_DESSIN_ARRETER_TOUCHE_RACC  = KeyEvent.VK_A;
 	private static final int  MENU_DESSIN_DEMARRER_TOUCHE_MASK = ActionEvent.CTRL_MASK;
 	private static final char MENU_DESSIN_DEMARRER_TOUCHE_RACC = KeyEvent.VK_D;
+	private static final int  MENU_FICHIER_OBTENIR_FORMES_TOUCHE_MASK = ActionEvent.CTRL_MASK;
+	private static final char MENU_FICHIER_OBTENIR_FORMES_TOUCHE_RACC = KeyEvent.VK_A;
 	private static final int  MENU_FICHIER_QUITTER_TOUCHE_MASK = ActionEvent.CTRL_MASK;
 	private static final char MENU_FICHIER_QUITTER_TOUCHE_RACC = KeyEvent.VK_Q;
 	private static final int  MENU_TRIER_VALEURS_TOUCHE_MASK = ActionEvent.CTRL_MASK;
 	private static final char MENU_TRIER_VALEURS_TOUCHE_RACC = KeyEvent.VK_R;
 	private static final String
 	MENU_FICHIER_TITRE = "app.frame.menus.file.title",
+	MENU_FICHIER_OBTENIR_FORMES = "app.frame.menus.file.start",
 	MENU_FICHIER_QUITTER = "app.frame.menus.file.exit",
 	MENU_DESSIN_TITRE = "app.frame.menus.draw.title",
 	MENU_DESSIN_DEMARRER = "app.frame.menus.draw.start",
@@ -70,6 +62,7 @@ public class MenuFenetre extends JMenuBar{
 	//menu_trier_
 	private static final String MESSAGE_DIALOGUE_A_PROPOS = "app.frame.dialog.about";  
 	private JMenuItem arreterMenuItem, demarrerMenuItem;
+	private JMenu menu, trierMenu;
 	private static final int DELAI_QUITTER_MSEC = 200;
 	private static JRadioButtonMenuItem sortBySequenceCroissante;
 	private JRadioButtonMenuItem sortBySequenceDecroissante;
@@ -84,14 +77,21 @@ public class MenuFenetre extends JMenuBar{
 	private JRadioButtonMenuItem sortByHauteurDecroissante;
 	private JRadioButtonMenuItem sortByOrdreServeur;
 	private static ButtonGroup groupJRadioButtonMenuItem = new ButtonGroup();
+
 	
 	CommBase comm; // Pour activer/dÃ©sactiver la communication avec le serveur
+	ListeChainee liste;
+	UtilitaireTrie ut;
+	FenetreFormes fenetre;
+	
 	/**
 	 * Constructeur
 	 */
-	public MenuFenetre(CommBase comm) {
+	public MenuFenetre(CommBase comm, ListeChainee liste, FenetreFormes fenetre) {
+		this.fenetre = fenetre;
+		ut = new UtilitaireTrie();
+		this.liste = liste;
 		this.comm = comm;
-		addMenuDessiner();
 		addMenuFichier();
 		addMenuTrierOptions();
 		addMenuAide();
@@ -127,8 +127,16 @@ public class MenuFenetre extends JMenuBar{
 	 * CrÃ©er le menu "File". 
 	 */
 	protected void addMenuFichier() {
-		JMenu menu = creerMenu(MENU_FICHIER_TITRE, new String[] { MENU_FICHIER_QUITTER });
+		JMenu menu = creerMenu(MENU_FICHIER_TITRE, new String[] {MENU_FICHIER_OBTENIR_FORMES, MENU_FICHIER_QUITTER });
+		// Bouton Obtenir Forme
 		menu.getItem(0).addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				comm.start();
+				rafraichirMenus();
+			}
+		});
+		// Bouton Quitter
+		menu.getItem(1).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				comm.stop();
 				try {
@@ -140,6 +148,9 @@ public class MenuFenetre extends JMenuBar{
 			}
 		});
 		menu.getItem(0).setAccelerator(
+				KeyStroke.getKeyStroke(MENU_FICHIER_OBTENIR_FORMES_TOUCHE_RACC,
+						MENU_FICHIER_OBTENIR_FORMES_TOUCHE_MASK));
+		menu.getItem(1).setAccelerator(
 				KeyStroke.getKeyStroke(MENU_FICHIER_QUITTER_TOUCHE_RACC,
 						MENU_FICHIER_QUITTER_TOUCHE_MASK));
 		add(menu);
@@ -173,82 +184,115 @@ public class MenuFenetre extends JMenuBar{
 		sortByHauteurCroissante = new JRadioButtonMenuItem(MENU_TRIER_VALEURS_PAR_HAUTEUR_CROISSANT);
 		sortByHauteurDecroissante = new JRadioButtonMenuItem(MENU_TRIER_VALEURS_PAR_HAUTEUR_DECROISSANTE);
 		sortByOrdreServeur = new JRadioButtonMenuItem(MENU_TRIER_VALEURS_PAR_ORDRE_ORIGINAL);
-				
+		groupJRadioButtonMenuItem = new ButtonGroup();		
 		
-		JMenu menu = creerMenu (MENU_TRIER_TITRE, new JRadioButtonMenuItem[] { sortBySequenceCroissante, sortBySequenceDecroissante, sortByAireFormeCroissante,sortByAireFormeDecroissante,sortByTypeFormes,sortByTypeFormesInverse, sortByDistanceMaximale,sortByLargeurCroissante, sortByLargeurDecroissante,  sortByHauteurCroissante, sortByHauteurDecroissante, sortByOrdreServeur });
-		menu.getItem(0).addActionListener(new ActionListener() {
+		trierMenu = creerMenu (MENU_TRIER_TITRE, new JRadioButtonMenuItem[] { sortBySequenceCroissante, sortBySequenceDecroissante, sortByAireFormeCroissante,sortByAireFormeDecroissante,sortByTypeFormes,sortByTypeFormesInverse, sortByDistanceMaximale,sortByLargeurCroissante, sortByLargeurDecroissante,  sortByHauteurCroissante, sortByHauteurDecroissante, sortByOrdreServeur });
+		trierMenu.getItem(0).addActionListener(new ActionListener() {
+			//séquence croissante
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 1er objet");
-			
+				ut.trieGeneral(liste, true, 1);
+				fenetre.repaint();
+				clearSelections(0);
 			}
 		});
-		menu.getItem(1).addActionListener(new ActionListener() {
+		//séquence décroissante
+		trierMenu.getItem(1).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 2e objet");
-			groupJRadioButtonMenuItem.clearSelection();
+				ut.trieGeneral(liste, false, 1);
+				fenetre.repaint();
+				clearSelections(1);
 			}
 		});
-    	menu.getItem(2).addActionListener(new ActionListener() {
+		//aire croissante
+		trierMenu.getItem(2).addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 3e objet");
-			groupJRadioButtonMenuItem.clearSelection();
+		    	ut.trieGeneral(liste, true, 2);
+		    	fenetre.repaint();
+		    	clearSelections(2);
 			}
 		});
-		menu.getItem(3).addActionListener(new ActionListener() {
+		//aire décroissante
+    	trierMenu.getItem(3).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 4e objet");
+				ut.trieGeneral(liste, false, 2);
+				fenetre.repaint();
+				clearSelections(3);
 			}
 		});
-		menu.getItem(4).addActionListener(new ActionListener() {
+    	//type de forme croissante
+		trierMenu.getItem(4).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 5e objet");
+				ut.trieGeneral(liste, true, 4);
+				fenetre.repaint();
+				clearSelections(4);
 			}
 		});
-		menu.getItem(5).addActionListener(new ActionListener() {
+		//type de forme décroissante
+		trierMenu.getItem(5).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 6e objet");
+				ut.trieGeneral(liste, false, 4);
+				fenetre.repaint();
+				clearSelections(5);
 			}
 		});
-		menu.getItem(6).addActionListener(new ActionListener() {
+		//distance maximale
+		trierMenu.getItem(6).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 7e objet");
+				ut.trieGeneral(liste, true, 3);
+				fenetre.repaint();
+				clearSelections(6);
 			}
 		});
-		menu.getItem(7).addActionListener(new ActionListener() {
+		//largeur croissance
+		trierMenu.getItem(7).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 8e objet");
+				ut.trieGeneral(liste, true, 5);
+				fenetre.repaint();
+				clearSelections(7);
 			}
 		});
-		menu.getItem(8).addActionListener(new ActionListener() {
+		//largeur décroissante
+		trierMenu.getItem(8).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 9e objet");
+				ut.trieGeneral(liste, false, 5);
+				fenetre.repaint();
+				clearSelections(8);
 			}
 		});
-		menu.getItem(9).addActionListener(new ActionListener() {
+		//grandeur croissante
+		trierMenu.getItem(9).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 10e objet");
+				ut.trieGeneral(liste, true, 6);
+				fenetre.repaint();
+				clearSelections(9);
 			}
 		});
-		menu.getItem(10).addActionListener(new ActionListener() {
+		//grandeur décroissante
+		trierMenu.getItem(10).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 11e objet");
+				ut.trieGeneral(liste, false, 6);
+				fenetre.repaint();
+				clearSelections(10);
 			}
 		});
-		menu.getItem(11).addActionListener(new ActionListener() {
+		//forme originale
+		trierMenu.getItem(11).addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			System.out.println("Test 12e objet");
+				ut.trieGeneral(liste, false, 7);
+				fenetre.repaint();
+				clearSelections(11);
 			}
 		});
 		KeyStroke.getKeyStroke(MENU_TRIER_VALEURS_TOUCHE_MASK,
 				MENU_TRIER_VALEURS_TOUCHE_RACC);
-		add(menu);
+		trierMenu.setEnabled(false);
+		add(trierMenu);
 	}
 	/**
 	 *  Activer ou dÃ©sactiver les items du menu selon la sÃ©lection. 
 	 */
 	private void rafraichirMenus() {
-		demarrerMenuItem.setEnabled(!comm.isActif());
-		arreterMenuItem.setEnabled(comm.isActif());
+		trierMenu.setEnabled(true);
 	}
 	/**
 	 * CrÃ©er un Ã©lÃ©ment de menu Ã  partir d'un champs principal et ses Ã©lÃ©ments
@@ -272,6 +316,16 @@ public class MenuFenetre extends JMenuBar{
 			groupJRadioButtonMenuItem.add(itemKeys[i]);
 		}
 		return menu;
+	}
+	/**
+	 * Désélectionne tous les radiobuttons sauf celui coché
+	 * @param currentSelection le radiobutton sélectionné
+	 */
+	private void clearSelections(int currentSelection){
+		for(int i = 0; i< trierMenu.getItemCount(); i++){
+			trierMenu.getItem(i).setSelected(false);
+		}
+		trierMenu.getItem(currentSelection).setSelected(true);
 	}
 	
 }

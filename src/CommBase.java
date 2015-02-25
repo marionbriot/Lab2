@@ -2,24 +2,20 @@
 Cours:  LOG121
 Projet: Squelette du laboratoire #1
 Nom du fichier: CommBase.java
-Date crÃ©Ã©: 2013-05-03
+Date crï¿½ï¿½ï¿½ï¿½: 2013-05-03
  *******************************************************
 Historique des modifications
  *******************************************************
  *@author Patrice Boucher
 2013-05-03 Version initiale
- *******************************************************/  
+ *******************************************************/
 
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -27,197 +23,175 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
- * Base d'une communication via un fil d'exÃ©cution parallÃ¨le
+ * Base d'une communication via un fil d'exï¿½ï¿½cution parallï¿½ï¿½le.
  */
+public class CommBase {
+
+ private final int DELAI = 1000;
+ private SwingWorker threadComm = null;
+ private PropertyChangeListener listener = null;
+ private boolean isActif = false;
+ private String hote;
+ private int port;
+ Socket socket;
+ private final String defaultServeurInfo = "localhost:10000";
 
 
-	public class CommBase {
-	public String formeInfo;
-	private final String defaultServeurInfo = "localhost:10000";
-	private Socket socket;//Ce qui contient la connexion
-	private final int DELAI = 1;
-	private SwingWorker threadComm =null;
-	private PropertyChangeListener listener = null;
-	private boolean isActif = false;
+ /**
+  * Attributs nécessaires à la gestion du serveur (envoie de commande, retour
+  * de commande, etc)
+  */
+ PrintStream sendCommand = null;
+ DataInputStream reponseCommand = null;
+ DataInputStream inputLine = null;
 
-	/**
-	 * Constructeur
-	 */
-	public CommBase(){
-	}
+ /**
+  * Constructeur
+  */
+ public CommBase() {
+ }
 
-	/**
-	 * Définir le récepteur de l'information reçue dans la communication avec le serveur
-	 * @param listener sera alertÃ© lors de l'appel de "firePropertyChanger" par le SwingWorker
-	 */
-	public void setPropertyChangeListener(PropertyChangeListener listener){
-		this.listener = listener;
-	}
+ /**
+  * Dï¿½finir le rï¿½cepteur de l'information reï¿½ue dans la communication
+  * avec le serveur
+  * 
+  * @param listener
+  *            sera alertï¿½ï¿½ lors de l'appel de "firePropertyChanger" par
+  *            le SwingWorker
+  */
+ public void setPropertyChangeListener(PropertyChangeListener listener) {
+  this.listener = listener;
+ }
 
-	/**
-	 * DÃ©marre la communication
-	 */
-	public void start(){
-		creerCommunication();
-	}
+ /**
+  * Dï¿½ï¿½marre la communication
+  */
+ public void start() {
+  creerCommunication();
+ }
 
-	/**
-	 * ArrÃªte la communication
-	 */
-	public void stop(){
-		fermerConnexion();
-		if(threadComm!=null)
-			threadComm.cancel(true); 
-		isActif = false;
-	}
-	/**
-	 * Cette méthode permet de se connecter au serveur 
-	 */
-	protected void connecteAuServeur(){
-		// On se connecte au serveur ici
-		// Tant que la connexion n'est pas valide 
-		while(true){
-			//Affichage de la boite de dialogue pour initialiser la connection au serveur de forme
-			//Utilise la valeur par default definie en global
-			String serveurInfo = JOptionPane.showInputDialog(null,
-					"Quel est le nom d'hote et le port du serveur de formes?",
-					defaultServeurInfo);
+ /**
+  * Arrï¿½ï¿½te la communication
+  */
+ public void stop() {
+  
+  fermerConnexion();
+  if(threadComm!=null)
+   threadComm.cancel(true); 
+  isActif = false;
+ }
 
-			System.out.println("L'information du serveur de forme est: \"" + serveurInfo + "\"");
+ /**
+  * Crï¿½ï¿½er le nï¿½ï¿½cessaire pour la communication avec le serveur
+  */
+ protected void creerCommunication() {
 
-			//On sépare en deux le texte écrit dans la fenetre 
-			String[] partiesInfo = serveurInfo.split(":");
+  String infoConn = JOptionPane
+    .showInputDialog("Quel est le nom d'hôte et le port du serveur de formes?", defaultServeurInfo);
+  // sépare les informations entrées par le client (hote et port)
+  String[] infos = infoConn.split(":");
+  hote = infos[0];
+  port = Integer.parseInt(infos[1]);
 
-			String hote = partiesInfo[0];
-			//Parsage en int pour mettre dans le socket
-			int port = Integer.parseInt(partiesInfo[1]);
+  try {
 
-			System.out.println("Hote: " + hote);
-			System.out.println("Port: " + port);
+   // initialisation d'un socket
+   socket = new Socket(hote, port);
 
-			try {
-				//Se connecte au serveur et arrete la boucle si il y a connexion
-				socket = new Socket(InetAddress.getByName(hote), port);
-				break;
-			}catch (UnknownHostException e) {
-				//e.printStackTrace();
-				//affiche un message d'erreur si la connexion n'a pas été éffectuée 
-				JOptionPane.showMessageDialog(null, "L'hôte " + hote + " n'est pas accessible : " );
+   // initilisation des attributs nécessaires à la gestion du serveur
+   sendCommand = new PrintStream(socket.getOutputStream());
+   reponseCommand = new DataInputStream(socket.getInputStream());
+   inputLine = new DataInputStream(new BufferedInputStream(System.in));
 
-			}catch (IOException e) {
-				//e.printStackTrace();
-				//affiche un message d'erreur si la connexion n'a pas été éffectuée 
-				JOptionPane.showMessageDialog(null, "Le port " + port + " n'est pas accessible" );
-			}
-		}
-	}
+  }
 
-	/**
-	 * Méthode qui créer la communication avec le serveur
-	 */
-	protected void creerCommunication(){		
-		
-		// Cree un fil d'execusion parallele au fil courant
-		threadComm = new SwingWorker(){
-			@Override
-			protected Object doInBackground() throws Exception {
-				System.out.println("Le fils d'execution parallele est lance");
+  catch (UnknownHostException  e) {
+   JOptionPane.showMessageDialog(null, "L'hôte auquel vous tentez de vous connecter n'existe pas !");
+   return;
+  } catch (IOException e) {
+   JOptionPane.showMessageDialog(null, "Le serveur " + hote + " ne répond pas sur le port " + port + " .");
+   return;
+  }
 
-				// On se connnecte au serveur
-				connecteAuServeur();
-				int compteur = 0;
-				while(compteur < 10){
-					
-					Thread.sleep(DELAI);
-					
-					// C'EST DANS CETTE BOUCLE QU'ON COMMUNIQUE AVEC LE SERVEUR
-					formeInfo = getLigneServeur();
-					if(!formeInfo.equals("commande> ")){
-						compteur ++;
-					}
-					//La methode suivante alerte l'observateur
-					if(listener!=null)
-						firePropertyChange("ligne", null, (Object) formeInfo);
-				}
-				if(compteur >= 10){
-					stop();
-				}
-				return null;
-			}
-		};
-		if(listener!=null)
-			threadComm.addPropertyChangeListener(listener); // La mÃ©thode "propertyChange" de ApplicationFormes sera donc appelÃ©e lorsque le SwinkWorker invoquera la mÃ©thode "firePropertyChanger" 		
-		threadComm.execute(); // Lance le fil d'exÃ©cution parallÃ¨le.
-		isActif = true;
-	}
+  // Crï¿½ï¿½e un fil d'exï¿½ï¿½cusion parallï¿½ï¿½le au fil courant,
+  threadComm = new SwingWorker() {
+   @Override
+   protected Object doInBackground() throws Exception {
 
-	/**
-	 * @return si le fil d'exÃ©cution parallÃ¨le est actif
-	 */
-	public boolean isActif(){
-		return isActif;
-	}
-	/**
-	 * Méthode qui permet d'arreter la connexion avec le serveur 
-	 */
-	public void fermerConnexion(){
-		//On notifie le serveur d'arreter la connexion
-		try {
-			BufferedWriter wr;
-			wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
-			wr.write("END\n");
-			wr.flush();
+    System.out.println("Le fils d'execution parallele est lance");
 
-		} catch (UnsupportedEncodingException e1) {
-			//e1.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Vous êtes maintenant déconnecté du serveur  ");
-		} catch (IOException e1) {
-			//e1.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Vous êtes maintenant déconnecté du serveur  ");
-		}
-		//On met un temps d'attente entre la commande END et la fermeture du socket 
-		try {
-			Thread.sleep(DELAI);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+     int compteur = 0;
+     while(compteur < 10){
+     
+     compteur ++;
+     Thread.sleep(DELAI);
 
-		try {
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+     // C'EST DANS CETTE BOUCLE QU'ON COMMUNIQUE AVEC LE SERVEUR
+     // envoie de la commande "GET" au serveur
+     sendCommand.println("GET");
+     // Store la réponse du serveur dans un String
+     String reponse = reponseCommand.readLine();
+     reponse = reponseCommand.readLine();
+     if (listener != null)
+      // on envoie la reponse à la classe FenetrePrincipale
+      firePropertyChange("ligne", null, reponse);
+    }
+     if(compteur >= 10){
+      stop();
+     }
+     return null;
+     // La mï¿½ï¿½thode suivante alerte l'observateur
+   
+    // return null;
+   }
+  };
+  if (listener != null)
+   threadComm.addPropertyChangeListener(listener); // La mï¿½ï¿½thode
+               // "propertyChange"
+               // de
+               // ApplicationFormes
+               // sera donc
+               // appelï¿½ï¿½e
+               // lorsque le
+               // SwinkWorker
+               // invoquera la
+               // mï¿½ï¿½thode
+               // "firePropertyChanger"
+  threadComm.execute(); // Lance le fil d'exï¿½ï¿½cution parallï¿½ï¿½le.
+  isActif = true;
+ }
 
-	}
-	/**
-	 * Méthode qui permet d'avoir les lignes en provenance du serveur
-	 * @return la ligne du serveur
-	 */
-	public String getLigneServeur(){
-		//On créer un écriveur qui écrit sur le socket
-		BufferedWriter wr;
-		try {
-			wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
-			//On envoit la commande GET au serveur
-			wr.write("GET\n");
-			//On nettoie l'écriveur
-			wr.flush();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+ /**
+  * @return si le fil d'exï¿½ï¿½cution parallï¿½ï¿½le est actif
+  */
+ public boolean isActif() {
+  return isActif;
+ }
+ 
+ public void fermerConnexion(){
+  //On notifie le serveur d'arreter la connexion
+  try {
+   sendCommand.println("END");
+   if(isActif()){
+	    JOptionPane.showMessageDialog(null, "Vous êtes maintenant déconnecté du serveur : " + hote);
+	   }
+  } 
+  catch (NullPointerException e1){
+      JOptionPane.showMessageDialog(null, "À la prochaine!");
+      System.exit(0);
+     }
+  //On met un temps d'attente entre la commande END et la fermeture du socket 
+  try {
+   Thread.sleep(DELAI);
+  } catch (InterruptedException e1) {
+   e1.printStackTrace();
+  }
 
-		//On créer un lecteur qui lit le socket
-		BufferedReader rd;
-		String tmp = null;
-		try {
-			rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			//On lit la premiere ligne du lecteur 
-			tmp = rd.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return tmp;
-	}
+  try {
+   socket.close();
+  } catch (IOException e) {
+   e.printStackTrace();
+  }
+
+ }
 }

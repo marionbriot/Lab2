@@ -1,215 +1,228 @@
-public class ListeChainee {
-	// Création d'une liste doublement chaînée
-	private Noeud debutListe;
-	private Noeud finListe;
-	private int nbElement;
-	private Noeud positionCourante;
+/******************************************************
+Cours:   LOG121
+Session: H2015
+Groupe:  2
+Projet: Laboratoire #2
+Étudiant(e)s: Marion Briot
 
-	/*
-	 * NOEUD //////////////////////////
+ *******************************************************
+Historique des modifications
+ *******************************************************
+2013-0X-XX Version initiale (et1)
+2013-0X-XX Ajout de la fonction (et2)
+ *******************************************************/
+
+/**
+ * Cette classe gère la liste chaînée
+ * @author Équipe FranQueb
+ * @date 2013/05/04
+ */
+public class ListeChainee {
+	
+	
+	private Noeud debut;
+	private Noeud fin;
+	private Noeud positionCourante;
+	
+	private int nbElements;
+
+	/**
+	 * La classe noeud, qui représente les éléments de la liste.
 	 */
 	private class Noeud {
+		
 		private Object element;
 		private Noeud suivant;
 		private Noeud precedent;
-
-		public Noeud(Object element, Noeud lienSuivant, Noeud lienPrecedent) {
-			this.element = element;
-			this.suivant = lienSuivant;
-			this.precedent = lienPrecedent;
-		}
 		
+		/**
+		 * Créer un nouveau noeud
+		 *
+		 * @param element Object à stocker dans la liste
+		 * @param suivant le noeud Suivant
+		 * @param precedent le noeud Précedent
+		 */
+		public Noeud(Object element, Noeud suivant, Noeud precedent) {
+			this.element = element;
+			this.suivant = suivant;
+			this.precedent = precedent;
+		}
 	}
-
-	// /////////////////////////////////////
-	public ListeChainee() {
-
-	}
-
-	public Noeud getPositionCourante() {
-		return positionCourante;
-	}
-
-	public Noeud getDebutListe() {
-		return debutListe;
-	}
-
+	/////
+	// MUTATEURS
+	/////
+	/**
+	 * Change la positioncourante.
+	 *
+	 * @param positionCourante nouveau noeud de la position courante
+	 */
 	public void setPositionCourante(Noeud positionCourante) {
 		this.positionCourante = positionCourante;
 	}
-
-	public int getNbElement() {
-		return nbElement;
-	}
-
-	/*
-	 * 
-	 * Avec l'élément à inserer et la position courante de la liste, nous allons
-	 * déterminer sa position dans la liste et l'ajouter avant la PC
+	
+	/**
+	 * Recule la position courante de 1.
 	 */
-	public void insererAvant(Object element) {
-		Noeud nInserer;
-
-		if (estVide()) { // si la liste est vide
-			nInserer = new Noeud(element, null, null); // pas suiv/prec
-			debutListe = nInserer; // debut = nouveau noeud
-			finListe = debutListe; // fin = debut
-			setPositionCourante(debutListe); // entre dans la liste
+	public void positionCourantePrecedent(){
+		if (positionCourante != debut) {
+			positionCourante = positionCourante.precedent;
+		} else {
+			positionCourante = fin;
 		}
-
-		else { // si la liste n'est pas vide
-			if (getNbElement() == 1) { // si 1 seul element
-				// le debut devient nouveau noeud
-				// le noeud precedent de la fin devient le debut
-				nInserer = new Noeud(element, positionCourante, null);
-				debutListe = nInserer;
-				finListe.precedent = debutListe;
-			} else {
-				// si nbElements += 2
-				// creer le noeud avant la PC
-				nInserer = new Noeud(element, positionCourante,
-						positionCourante.precedent);
-
-				if (positionCourante == finListe) {// si sur fin liste
-					finListe.precedent = nInserer; // change le precedent de fin
-
-				}
-				if (positionCourante.precedent == debutListe) {
-					// si coller sur debut. chage le suivant du debut
-					// aéquatement
-					positionCourante.precedent = nInserer;
-					debutListe.suivant = nInserer;
-				}
-				// noeud tmp pour insertion
-				Noeud tmp = nInserer.precedent;
-				// insert nInserer
-				tmp.suivant = nInserer;
-				nInserer.suivant = positionCourante;
-				positionCourante.precedent = nInserer;
-			}
-		}
-		// incrémente nb élément
-		nbElement++;
 	}
-
-	/*
-	 * 
-	 * Avec l'élément à inserer et la position courante de la liste, nous allons
-	 * déterminer sa position dans la liste et l'ajouter apres la PC
+	
+	/**
+	 * Avance la position courante de 1
+	 */
+	public void positionCouranteSuivant(){
+		if (positionCourante.suivant == null) {
+			positionCourante = debut;
+		} else {
+			positionCourante = positionCourante.suivant;
+		}
+	}
+	
+	/**
+	 * Met la position courante au début
+	 */
+	public void setPositionCouranteDebut(){
+		positionCourante = debut;
+	}
+	
+	/////
+	// ACCESSEURS
+	/////
+	
+	/**
+	 * Retourne le nb d'éléments de la liste
+	 *
+	 * @return nb d'élements
+	 */
+	public int getNbElements(){
+		return nbElements;
+	}
+	
+	/**
+	 * retourne l'élément de la position courante
+	 *
+	 * @return l'Object de la positionCourante
+	 */
+	public Object getPositionCourante(){
+		return positionCourante.element;
+	}
+	
+	/**
+	 * Vérifie si la liste est vide.
+	 *
+	 * @return vrai si liste est vide
+	 */
+	public boolean estVide() {
+		return nbElements <= 0;
+	}
+	
+	/////
+	// MÉTHODES UTILITAIRES
+	/////
+	
+	/**
+	 * Vider liste.
+	 */
+	public void viderListe(){
+		while(getNbElements() > 0){
+			setPositionCouranteDebut();
+			supprimerPositionCourante();
+		}
+	}
+	
+	/**
+	 * Inserer un noeud après la position courante.
+	 *
+	 * @param element élément à insérer
 	 */
 	public void insererApres(Object element) {
-		if(getNbElement() >= 10){
+		// Noeud à inserer
+		Noeud noeudInserer;
+		
+		// Si la liste est pleine (10 ou +) ou la vide avant d'insérer
+		if(getNbElements() >= 10){
 			viderListe();
 		}
-		Noeud nInserer;
 		
-		if (estVide()) {	// si liste vide, créer le premier element
-			nInserer = new Noeud(element, null, null);
-			debutListe = nInserer;
-			finListe = debutListe;
-			setPositionCourante(debutListe);
+		// Si liste est vide, créer noeud de début
+		if (estVide()) {
+			noeudInserer = new Noeud(element, null, null);
+			debut = noeudInserer;
+			fin = debut;
+			setPositionCourante(debut);
 		}
-
+		
 		else {
-			
-			// si la liste n'est pas vite
-			if (getNbElement() == 1) {
-				// fin liste devient nouveau noeud et suivant du début = fin
-				nInserer = new Noeud(element, null, positionCourante);
-				finListe = nInserer;
-				debutListe.suivant = finListe;
-			} else {
-				// si PC = liste, nouvelle fin devient nInserer
-				if (positionCourante == finListe) {
-					nInserer = new Noeud(element, null, positionCourante);
-					positionCourante.suivant = nInserer;
+			// Si nb d'éléments = 1, sépare début et fin
+			if (nbElements == 1) {
+				noeudInserer = new Noeud(element, null, positionCourante);
+				fin = noeudInserer;
+				debut.suivant = fin;
+			}
+			// Si insère après la fin, déplace la fin vers nouveau noeud
+			else {
+				if (positionCourante == fin) {
+					noeudInserer = new Noeud(element, null, positionCourante);
+					positionCourante.suivant = noeudInserer;
+					fin = noeudInserer;
 				}
+				// Sinon, insère normalement
 				else {
-					// inserer le nouveau noeud apres la PC
-					nInserer = new Noeud(element, positionCourante.suivant,
+					noeudInserer = new Noeud(element, positionCourante.suivant,
 							positionCourante);
-					positionCourante.suivant = nInserer;
+					positionCourante.suivant = noeudInserer;
 				}
 
 			}
 		}
-		nbElement++;
+		nbElements++;
 	}
-
-	public void supprimerPC() {
-		// seulement si la liste n'est pas vide
-		if (!(estVide())) {
-			if (getNbElement() == 1) { // Si 1 seul element dans la liste,
-										// vide la liste completement
-				debutListe = null;
-				finListe = debutListe;
-				positionCourante = null;
-			} else {
-				// si PC = fin, recule la fin de 1
-				if (positionCourante == finListe) {
+	
+	/**
+	 * Supprimer le noeud à la position courante
+	 */
+	public void supprimerPositionCourante() {
+		if(!estVide()){
+			if(nbElements > 1){
+				// Si supprime la fin
+				if(positionCourante == fin){
 					positionCourante.precedent.suivant = null;
-					finListe = positionCourante.precedent;
+					fin = positionCourante.precedent;
 					positionCourantePrecedent();
 				}
-				// si PC = debut, avance le debut de 1
-				else if (positionCourante == debutListe) {
+				// Si supprime le début
+				else if(positionCourante == debut){
 					positionCourante.suivant.precedent = null;
-					debutListe = positionCourante.suivant;
+					debut = positionCourante.suivant;
 					positionCouranteSuivant();
 				}
-				// sinon, effectue la suppression normalement
-				else {
+				// Supprime normalement
+				else{
 					positionCourante.precedent.suivant = positionCourante.suivant;
 					positionCourante.suivant.precedent = positionCourante.precedent;
 					positionCouranteSuivant();
 				}
 			}
+			// nb d'éléments = 1
+			else{
+				debut = null;
+				fin = debut;
+				positionCourante = null;
+			}
 		}
-		nbElement--;
+		nbElements--;
 	}
-
-	// Avance la position courante à la prochaine de façon circulaire
-	public void positionCouranteSuivant() {
-		if (positionCourante.suivant == null) {
-			positionCourante = debutListe;
-		} else {
-			positionCourante = positionCourante.suivant;
-		}
-	}
-
-	// Recule la position courante à la précédente de façon circulaire
-	public void positionCourantePrecedent() {
-		if (positionCourante != debutListe) {
-			positionCourante = positionCourante.precedent;
-		} else {
-			positionCourante = finListe;
-		}
-	}
-	public void positionCouranteDebut(){
-		positionCourante = debutListe;
-	}
-	public void positionCouranteFin(){
-		positionCourante = finListe;
-	}
-	// retourne la valeur de la position courante
-	public Object affichePositionCourante() {
-		return positionCourante.element;
-	}
-	// retourne si la liste est vide
-	public boolean estVide() {
-		return nbElement <= 0;
-	}
-
-	public void setElement(Object element){
-		positionCourante.element = element;
-	}
-	public boolean viderListe(){
-		boolean status = false;
-		while(getNbElement() > 0){
-			positionCouranteDebut();
-			supprimerPC();
-		}
-		status = true;
-		return status;
+	/**
+	 * Echanger elements.
+	 */
+	public void echangerElements(){
+		Object noeudTmp = null;
+		noeudTmp = positionCourante.element;
+		positionCourante.element = positionCourante.suivant.element;
+		positionCourante.suivant.element = noeudTmp;
 	}
 }
